@@ -34,8 +34,8 @@ class Vote(Base):
 	person_id = Column(Integer,ForeignKey('MPs.person_id') ,primary_key=True)
 	division_number = Column(Integer, ForeignKey('divisions.division_number'), primary_key=True)
 	vote = Column(String)
-	
-	division = relationship('Division')
+
+	division = relationship('Division',back_populates='votes')
 
 	mp = relationship('MP', back_populates='votes')
 
@@ -52,6 +52,7 @@ class Division(Base):
 	division_number = Column(Integer, primary_key=True)
 	votes = relationship('Vote', back_populates='division')
 	mps = association_proxy('votes','mp')
+	title = Column(String)
 
 
 	# url = Column(String)
@@ -90,14 +91,3 @@ class Division(Base):
 	def party_noes(self):
 		'''returns dict of form 'party': number of aye votes'''
 		return {party:len(list(filter(lambda vote : vote.mp.party==party,self.noes))) for party in self.parties}
-
-
-
-
-
-
-
-
-
-
-

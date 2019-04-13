@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from mapped_classes import Base
+from mapped_classes import *
+
 import os
 
 DB_PATH = 'commons.db'
@@ -18,6 +19,7 @@ def is_db():
 def connect_database(path='commons.db'):
 	path = 'sqlite:///{}'.format(path)
 	engine = create_engine(path, echo=False)
+	# Base.metadata.drop_all(engine)
 	Base.metadata.create_all(engine)
 	return engine
 
@@ -46,7 +48,3 @@ def start_db(path='commons.db'):
 Session = start_db(DB_PATH )
 
 # if __name__ == '__main__':
-
-
-
-
