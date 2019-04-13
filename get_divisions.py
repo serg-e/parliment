@@ -4,12 +4,13 @@ import bs4
 import requests
 import numpy as np
 import seaborn as sns
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse, parse_qs
+
 
 
 
 def get_deivision_url(date, div_number, display='allpossible'):
-	'''returns the url containing division table, both the date 
+	'''returns the url containing division table, both the date
 		division number required. date format: YYYY-MM-DD'''
 
 	base_url = 'https://www.publicwhip.org.uk/division.php?'
@@ -34,14 +35,14 @@ def download_division_table(url):
 	lines = int(len(data)/4)
 	data=data.reshape(lines,4)
 	frame =pd.DataFrame(data=data[1:,...], columns=data[0])
-	
+
 	return frame
 
 def get_division(date, div_number, url=None):
 	''' date: YYYY-MM-DD, division number required, dowloads data and outputs data frame
 		source url: https://www.publicwhip.org.uk/division.php?
 	'''
-	if not url: 
+	if not url:
 		url = get_deivision_url(date,div_number)
 	frame = download_division_table(url)
 	frame['Party']=frame.Party.apply(parse_party)
@@ -60,24 +61,28 @@ def parse_party(string):
 	        return i
 	return np.nan
 
-def download_divisions_index(url='https://www.publicwhip.org.uk/divisions.php'): 
-    page=requests.get(url)
-    soup = bs(page.content, 'html.parser')
-    table =soup.find('table', class_='votes')
-    data = []
-    for i in table.find_all('a',href=True):
-        div_dict = parse_qs(urlparse(i['href']).query)
-        
-        try:
-            div_dict['house']
-            div_dict = {key:value[0] for key, value in div_dict.items()}
-            div_dict['title'] = i.get_text()
-            data.append(div_dict)
-        except KeyError:
-            continue
-    frame = pd.DataFrame(data)
-    return frame
+def download_divisions_index(url='https://www.publicwhip.org.uk/divisions.php'):
+	''' download table of divisions: date, number, title, house'''
+	page=requests.get(url)
+	soup = bs(page.content, 'html.parser')
+	table =soup.find('table', class_='votes')
+	data = []
+	for i in table.find_all('a',href=True):
+	    div_dict = parse_qs(urlparse(i['href']).query)
 
+	    try:
+	        div_dict['house']
+	        div_dict = {key:value[0] for key, value in div_dict.items()}
+	        div_dict['title'] = i.get_text()
+	        data.append(div_dict)
+	    except KeyError:
+	        continue
+	frame = pd.DataFrame(data)
+	frame['division_number']=frame.number.astype(int,inplace=True)
+	frame.drop(axis=1,inplace=True, columns=['number'])
+	return frame
 
-
-
+if __name__ =='__main__':
+	divs = download_divisions_index()
+	divs.division_numner
+	divs.head()
