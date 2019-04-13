@@ -21,7 +21,7 @@ import 	json
 #        'getWrans':[('output',), ('date', 'search', 'person', 'gid', 'order', 'page', 'num')],
 #        'getWMS':[('output',), ('date', 'search', 'person', 'gid', 'order', 'page', 'num')],
 #        'getHansard':[('output',), ('search', 'person', 'order', 'page', 'num')],
-#        'getComments':[('output',), ('date', 'search', 'user_id', 'pid', 'page', 'num')]} 
+#        'getComments':[('output',), ('date', 'search', 'user_id', 'pid', 'page', 'num')]}
 #         }
 
 API_KEY = 'DGBon5FGVqESCwBGagEdjKKV'
@@ -36,9 +36,11 @@ class TWFY:
 		self.params['output'] = output
 
 
-	def getMPS(self, **kwargs):
+	def getMPS(self, date=None):
 		'''returns list of dicts, dict for each MP'''
 		params = self.params
+		if date is not None:
+			params['date'] = date
 		response = requests.get(self.url + 'getMPS', params=params)
 		return json.loads(response.text)
 
@@ -46,5 +48,7 @@ class TWFY:
 twfy=TWFY(API_KEY)
 
 
-# t= TWFY(API_KEY,'js')
 
+
+
+# t= TWFY(API_KEY,'js')
