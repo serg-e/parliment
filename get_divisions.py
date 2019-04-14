@@ -5,7 +5,7 @@ import requests
 import numpy as np
 import seaborn as sns
 from urllib.parse import urlencode, urlparse, parse_qs
-
+import os
 
 
 
@@ -36,21 +36,32 @@ def download_division_table(url):
 	data=data.reshape(lines,4)
 	frame =pd.DataFrame(data=data[1:,...], columns=data[0])
 
+
+
 	return frame
 
 def get_division(date, div_number, url=None):
 	''' date: YYYY-MM-DD, division number required, dowloads data and outputs data frame
 		source url: https://www.publicwhip.org.uk/division.php?
 	'''
-	if not url:
-		url = get_deivision_url(date,div_number)
-	frame = download_division_table(url)
-	frame['Party']=frame.Party.apply(parse_party)
-	frame['division_number'] = div_number
-	frame['date'] = pd.to_datetime(date)
-	frame['url'] = url
-	frame = frame.rename(columns={'Vote':'vote'})
-	return frame
+	path = os.path.join('data', str(div_number))
+	
+	try:
+		frame = pd.read_csv(path)
+		return frame
+
+	except FileNotFoundError:
+		if not url:
+			url = get_deivision_url(date,div_number)
+		frame = download_division_table(url)
+		frame['Party']=frame.Party.apply(parse_party)
+		frame['division_number'] = div_number
+		frame['date'] = pd.to_datetime(date)
+		frame['url'] = url
+		frame = frame.rename(columns={'Vote':'vote'})
+
+		frame.to_csv(path)
+		return frame
 
 
 def parse_party(string):

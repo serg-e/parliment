@@ -90,13 +90,13 @@ def bulk_add_divisions(divs,session, house='commons'):
 	divs = divs[divs.house==house].copy()
 	divs_in_db = [num[0] for num  in session.query(Vote.division_number).distinct()]
 	divs = divs[~divs.division_number.isin(divs_in_db)].copy()
-	div_frames = [get_division((row['date']), row['division_number']) for index, row in divs.iterrows()]
-	print('All division data downloaded, adding. {} divisions'.format(len(div_frames)))
+	div_frames = (get_division((row['date']), row['division_number']) for index, row in divs.iterrows())
+	print('All division data downloaded, adding. {} divisions'.format(len(divs)))
 	added =0
 	for div in div_frames:
 		add_division(div,session)
 		added +=1
-		print('{0} divsions added of {1}, %'.format(added,len(div_frames), int(added/len(div_frames)*100)))
+		print('{0} divsions added of {1}, %'.format(added,len(divs), int(added/len(divs)*100)))
 
 
 
@@ -121,16 +121,17 @@ def populate_dvisions(session):
 			session.rollback()
 
 if __name__ == '__main__':
-	# session = Session()
 	session = Session()
-	get_id_fuzz('Paul Flynn',session)
-	add_mps(session,date='2017-08-01')
-	add_mps(session,date='2018-08-01')
-	add_mps(session,date='2019-08-01')
-	print('mps added')
-	divs = download_divisions_index()
-	bulk_add_divisions(divs,session)
+	# session = Session()
+	# add_mps(session,date='2017-08-01')
+	# add_mps(session,date='2018-08-01')
+	# add_mps(session,date='2019-01-29')
+	#
+	# add_mps(session,date='2019-02-01')
+	# print('mps added')
+	# divs = download_divisions_index()
 	# bulk_add_divisions(divs,session)
+	# # bulk_add_divisions(divs,session)
 	populate_dvisions(session)
 	update_div_titles(session)
 

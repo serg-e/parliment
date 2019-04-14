@@ -71,11 +71,11 @@ def kmodes(X,k):
 
     i = 0
     while not (end_modes == start_modes).all():
-        print('iter_start','END',end_modes,'START', start_modes)
+        # print('iter_start','END',end_modes,'START', start_modes)
         start_modes = end_modes
         cluster_vector = assign_modes(X,start_modes)
         end_modes = calc_new_modes(X,cluster_vector, start_modes)
-        print('iter_end','END',end_modes,'START', start_modes)
+        # print('iter_end','END',end_modes,'START', start_modes)
         i+=1
 
 
@@ -84,6 +84,4 @@ def kmodes(X,k):
 
     return(end_modes, cluster_vector)
 
-if __name__=='__main__':
-    X = np.array([['aye', 'no','no'],['aye', 'no','no'], ['aye', 'no','aye'],['aye', 'aye','no']])
-    print(kmodes(X,2))
+# if __name__=='__main__':
