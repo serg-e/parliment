@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+body {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #444;
+  shape-rendering: crispEdges;
+}
+
+.dot {
+  stroke: #444;
+}
+
+div.tooltip {
+  top: -1000px;
+  position: absolute;
+  padding: 10px;
+  background: rgba(255, 255, 255, .90);
+  border: 1px solid lightgray;
+  pointer-events: none;
+}
+.tooltip-hidden{
+  opacity: 0;
+}
+
+</style>
+<body>
+
+<div id="chart">
+<svg width='1000' height='600'></svg>
+</div>
+<div class='tooltip'></div>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="commons-vis.js"></script>
