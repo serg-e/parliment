@@ -5,6 +5,7 @@ import numpy as np
 from kmodes import kmodes
 from sqlalchemy import inspect
 
+eu_divisions = [357, 358, 359,360,361,362,373,374,375,377,378,394, 395, 404, 405,406,407,408,409,413,356,354,293,293,292,291,274]
 
 def make_mp_votes_array(mps, div_nums):
     ''' array : len(mps) x len(div_nums) sequence of votes fo reach mp (row)
@@ -29,9 +30,20 @@ def cluster_mps(mps,k,div_nums):
 
     return results, modes
 
+def add_master_nodes(frame):
+    clusters = set(frame.cluster)
+    new_nodes = [{'person_id':'commons'}]
+    for i in clusters:
+        c = {'person_id':i, 'cluster':'commons'}
+        new_nodes.append(c)
+    frame = frame.append(new_nodes)
+    return frame
 
 
 if __name__ == '__main__':
-
-
-    print(results.head())
+    session = Session()
+    mps = session.query(MP).all()
+    frame, _ = cluster_mps(mps,4,eu_divisions)
+    nodes_frame =  add_master_nodes(frame) 
+    with open('mp_clusters.json', 'w+') as file:
+        nodes_frame.to_json(file, orient='records')
