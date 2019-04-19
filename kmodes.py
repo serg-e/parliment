@@ -44,7 +44,7 @@ def assign_mode(xi,modes):
 #     return np.concatenate(xi,[dists.index(min(dists))])
 
 def assign_modes(X,modes):
-    'vector assigning each xi to mode'
+    # 'vector assigning each xi to mode'
     cluster_vector = np.array([assign_mode(xi,modes) for xi in X])
     return cluster_vector
 
@@ -58,7 +58,7 @@ def calc_new_modes(X,cluster_vector,modes):
             new_modes.append(new_mode)
 
         except IndexError:
-            # empty cluster
+            # empty
             q = initlise_modes(X,1)
             new_modes.append(q)
 
@@ -67,17 +67,24 @@ def calc_new_modes(X,cluster_vector,modes):
 
 
 def kmodes(X,k):
-    ''' X data i x j , k modes , output tuple of arrays
+    ''' X data n x m_attr , k modes , output tuple of arrays
     (modes 1 x k , cluster vector 1xi)'''
+    n, m_attr = X.shape
+
     end_modes = initlise_modes(X,k)
     start_modes = np.ones_like(end_modes)
+    #
+    start_cluster_vector = np.ones(n)
+    end_cluster_vector = np.random.randn(n)
 
     i = 0
-    while not (end_modes == start_modes).all():
+    while not (end_cluster_vector == start_cluster_vector).all():
         # print('iter_start','END',end_modes,'START', start_modes)
         start_modes = end_modes
-        cluster_vector = assign_modes(X,start_modes)
-        end_modes = calc_new_modes(X,cluster_vector, start_modes)
+        start_cluster_vector = end_cluster_vector
+        end_cluster_vector = assign_modes(X,start_modes)
+        end_modes = calc_new_modes(X,end_cluster_vector, start_modes)
+
         # print('iter_end','END',end_modes,'START', start_modes)
         i+=1
 
