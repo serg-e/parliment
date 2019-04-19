@@ -21,7 +21,7 @@ back to Step 2; otherwise, stop.
 
 def distance(xi,q):
 #     print(xi,'dist from',q)
-    assert len(xi)==len(q),'Sequences of unequal lenght, distance undefined'
+    assert len(xi)==len(q),'Sequences of unequal length, distance undefined'
     dist = 0
     for i, j in zip(list(xi),list(q)):
         if i!=j:
@@ -29,16 +29,17 @@ def distance(xi,q):
     return dist
 
 def initlise_modes(X,k):
-    #initialise
-    modes =[]
-    init_modes= np.random.choice(list(range(len(X))),size=k)
-    for i in init_modes:
-        modes.append(X[i])
-    return np.array(modes)
+    #initialise, ineefficient !
+    unique_rows = np.unique(X, axis =0)
+    rand = np.random.permutation(unique_rows)
+    return rand[:k]
+
 
 def assign_mode(xi,modes):
     '''needs work, if two modes equadistant the first one is picked'''
     dists = [distance(xi,q) for q in modes]
+    if len(dists) != len(set(dists)):
+        print('xi',xi,'modes',modes)
     return dists.index(min(dists))
 #     return np.concatenate(xi,[dists.index(min(dists))])
 
@@ -57,7 +58,9 @@ def calc_new_modes(X,cluster_vector,modes):
             new_modes.append(new_mode)
 
         except IndexError:
-            print(q,'has no members')
+            # empty cluster
+            q = initlise_modes(X,1)
+            new_modes.append(q)
 
     return np.array(new_modes)
 
@@ -84,4 +87,4 @@ def kmodes(X,k):
 
     return(end_modes, cluster_vector)
 
-# if __name__=='__main__':
+if __name__=='__main__':pass
