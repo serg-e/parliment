@@ -1,9 +1,10 @@
-from start_db import Session
-from mapped_classes import *
+from .db import Session
+from .mapped_classes import *
+from .kmodes import kmodes
 import pandas as pd
 import numpy as np
-from kmodes import kmodes
 from sqlalchemy import inspect
+import os
 
 eu_divisions = [357, 358, 359,360,361,362,373,374,375,377,378,394, 395, 404, 405,406,407,408,409,413,356,354,293,293,292,291,274]
 
@@ -14,6 +15,9 @@ def make_mp_votes_array(mps, div_nums):
     votes = [mp.votes for mp in mps]
     filtered_votes = [[vote.vote for vote in filter(lambda vote : vote.division_number in div_nums, mp)] for mp in votes]
     return np.array(filtered_votes)
+
+
+
 
 def cluster_mps(mps,k,div_nums):
     ''' list of mps , number of clusters and divsions to cluster on, returns
@@ -40,10 +44,14 @@ def add_master_nodes(frame):
     return frame
 
 
+
+
 if __name__ == '__main__':
     session = Session()
     mps = session.query(MP).all()
     frame, _ = cluster_mps(mps,4,eu_divisions)
-    nodes_frame =  add_master_nodes(frame) 
-    with open('mp_clusters.json', 'w+') as file:
+    nodes_frame =  add_master_nodes(frame)
+    filename = 'web-app/mp_clusters.json'
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    with open(filename, 'w+') as file:
         nodes_frame.to_json(file, orient='records')

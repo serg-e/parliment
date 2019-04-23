@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from mapped_classes import *
-
+from sqlalchemy.orm import scoped_session
+from .mapped_classes import *
 import os
 
 DB_PATH = 'commons.db'
@@ -45,6 +45,6 @@ def start_db(path='commons.db'):
 		return Session
 
 
-Session = start_db(DB_PATH )
+Session = scoped_session(start_db(DB_PATH ))
 
 # if __name__ == '__main__':

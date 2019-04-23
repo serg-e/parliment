@@ -38,8 +38,8 @@ def initlise_modes(X,k):
 def assign_mode(xi,modes):
     '''needs work, if two modes equadistant the first one is picked'''
     dists = [distance(xi,q) for q in modes]
-    if len(dists) != len(set(dists)):
-        print('xi',xi,'modes',modes)
+    # if len(dists) != len(set(dists)):
+    #     print('xi',xi,'modes',modes)
     return dists.index(min(dists))
 #     return np.concatenate(xi,[dists.index(min(dists))])
 
@@ -69,6 +69,7 @@ def calc_new_modes(X,cluster_vector,modes):
 def kmodes(X,k):
     ''' X data n x m_attr , k modes , output tuple of arrays
     (modes 1 x k , cluster vector 1xi)'''
+    #red inti variables
     n, m_attr = X.shape
 
     end_modes = initlise_modes(X,k)

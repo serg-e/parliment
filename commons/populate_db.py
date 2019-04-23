@@ -1,14 +1,10 @@
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative  import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship
-from twfy import twfy
-from sqlalchemy.orm import sessionmaker
-from get_divisions import get_division,download_divisions_index
-from fuzzywuzzy import fuzz
-from start_db import Session
-from mapped_classes import *
+from .twfy import twfy
+from .get_divisions import get_division,download_divisions_index
+from .db import Session
+from .mapped_classes import *
 from sqlalchemy.exc import IntegrityError
+from fuzzywuzzy import fuzz
+
 from datetime import date
 
 
@@ -40,7 +36,7 @@ def get_id_fuzz(name,session):
 	closestd_id = matchs.index(max(matchs))
 	cname = [mp.name for mp in  session.query(MP).all()][closestd_id]
 	print('person_id not found for {0}, {1} closest{2}'.format(name,closest,cname))
-	return 'none'
+	return None
 
 '''lazy needs work, fuzzy compare input name with list of MP names in DB
 	returns person_id'''
@@ -96,7 +92,10 @@ def bulk_add_divisions(divs,session, house='commons'):
 	for div in div_frames:
 		add_division(div,session)
 		added +=1
-		print('{0} divsions added of {1}, %'.format(added,len(divs), int(added/len(divs)*100)))
+		print('{0} divsions added of {1}'.format(added,len(divs)))
+	populate_dvisions(session)
+	update_div_titles(session)
+	session.commit()
 
 
 
@@ -109,7 +108,9 @@ def update_div_titles(session,divs_info=None):
 			div.title= divs_info[divs_info.division_number==div.division_number]['title'].iloc[0]
 		except IndexError:
 			print('No title found for division numner {}'.format(div.division_number))
-	session.commit()
+			continue
+
+
 
 def populate_dvisions(session):
 	divs = [num[0] for num  in session.query(Vote.division_number).distinct()]
@@ -122,11 +123,7 @@ def populate_dvisions(session):
 
 if __name__ == '__main__':
 	session = Session()
-	# session = Session()
-	# add_mps(session,date='2017-08-01')
-	# add_mps(session,date='2018-08-01')
-	# add_mps(session,date='2019-01-29')
-	#
+
 	# add_mps(session,date='2019-02-01')
 	# print('mps added')
 	# divs = download_divisions_index()
@@ -134,6 +131,7 @@ if __name__ == '__main__':
 	# # bulk_add_divisions(divs,session)
 	populate_dvisions(session)
 	update_div_titles(session)
+	Session.remove()
 
 	print('Done')
 
