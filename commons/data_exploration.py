@@ -1,6 +1,6 @@
-from .db import Session
-from .mapped_classes import *
-from .kmodes import kmodes
+from commons.db import Session
+from commons.mapped_classes import *
+from commons.kmodes import kmodes
 import pandas as pd
 import numpy as np
 from sqlalchemy import inspect
@@ -34,6 +34,10 @@ def cluster_mps(mps,k,div_nums):
 
     return results, modes
 
+
+
+
+
 def add_master_nodes(frame):
     clusters = set(frame.cluster)
     new_nodes = [{'person_id':'commons'}]
@@ -41,14 +45,23 @@ def add_master_nodes(frame):
         c = {'person_id':i, 'cluster':'commons'}
         new_nodes.append(c)
     frame = frame.append(new_nodes)
-    return frame
+    return frame, new_nodes
 
+
+
+
+def div2dict(div):
+    div_dict = {'title': div.title , 'division_number':div.division_number, 'ayes':len(div.ayes), 'noes':len(div.noes), 'abstentions':len(div.abstentions)}
+    return div_dict
 
 
 
 if __name__ == '__main__':
     session = Session()
     mps = session.query(MP).all()
+
+
+
     frame, _ = cluster_mps(mps,4,eu_divisions)
     nodes_frame =  add_master_nodes(frame)
     filename = 'web-app/mp_clusters.json'

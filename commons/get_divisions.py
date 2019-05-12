@@ -45,7 +45,7 @@ def get_division(date, div_number, url=None):
 		source url: https://www.publicwhip.org.uk/division.php?
 	'''
 	path = os.path.join('data', str(div_number))
-	
+
 	try:
 		frame = pd.read_csv(path)
 		return frame
