@@ -77,6 +77,7 @@ class Division(Base):
 			return 'passed'
 		else:
 			return 'rejected'
+
 	@hybrid_property
 	def parties(self):
 		parties = list(set([mp.party for mp in self.mps]))
@@ -85,9 +86,11 @@ class Division(Base):
 	@hybrid_property
 	def party_ayes(self):
 		'''returns dict of form 'party': number of aye votes'''
-		return {party:len(list(filter(lambda vote : vote.mp.party==party,self.ayes))) for party in self.parties}
+		return {party:len(list(filter(lambda vote : vote.mp.party==party,self.ayes)))\
+		 for party in self.parties}
 
 	@hybrid_property
 	def party_noes(self):
 		'''returns dict of form 'party': number of aye votes'''
-		return {party:len(list(filter(lambda vote : vote.mp.party==party,self.noes))) for party in self.parties}
+		return {party:len(list(filter(lambda vote : vote.mp.party==party,self.noes)))\
+		 for party in self.parties}

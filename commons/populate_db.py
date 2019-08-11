@@ -1,7 +1,7 @@
-from .twfy import twfy
-from .get_divisions import get_division,download_divisions_index
-from .db import Session
-from .mapped_classes import *
+from commons.twfy import twfy
+from commons.get_divisions import get_division,download_divisions_index
+from commons.db import Session
+from commons.mapped_classes import *
 from sqlalchemy.exc import IntegrityError
 from fuzzywuzzy import fuzz
 
@@ -23,6 +23,12 @@ def add_mps(session,date=date.today()):
 		except IntegrityError:
 			session.rollback()
 	session.commit()
+
+def mps_current(date=date.today()):
+	mps = twfy.getMPS(date=date)
+	mp_ids = [int(mp['person_id']) for mp in mps ]
+	return mp_ids
+
 
 
 def get_id_fuzz(name,session):
@@ -122,17 +128,18 @@ def populate_dvisions(session):
 			session.rollback()
 
 if __name__ == '__main__':
-	session = Session()
-
-	# add_mps(session,date='2019-02-01')
-	# print('mps added')
-	# divs = download_divisions_index()
-	# bulk_add_divisions(divs,session)
+	# session = Session()
+	#
+	# # add_mps(session,date='2019-02-01')
+	# # print('mps added')
+	# # divs = download_divisions_index()
 	# # bulk_add_divisions(divs,session)
-	populate_dvisions(session)
-	update_div_titles(session)
-	Session.remove()
+	# # # bulk_add_divisions(divs,session)
+	# populate_dvisions(session)
+	# update_div_titles(session)
+	# Session.remove()
 
-	print('Done')
+	# print('Done')
+	mps_current()
 
 ''' check that each divsion contains all votes'''

@@ -51,7 +51,8 @@ def add_master_nodes(frame):
 
 
 def div2dict(div):
-    div_dict = {'title': div.title , 'division_number':div.division_number, 'ayes':len(div.ayes), 'noes':len(div.noes), 'abstentions':len(div.abstentions)}
+    div_dict = {'title': div.title , 'division_number':div.division_number,\
+     'ayes':len(div.ayes), 'noes':len(div.noes), 'abstentions':len(div.abstentions)}
     return div_dict
 
 

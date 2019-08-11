@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import scoped_session
-from .mapped_classes import *
+from commons.mapped_classes import *
 import os
 
 DB_PATH = 'commons.db'

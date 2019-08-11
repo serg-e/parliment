@@ -53,6 +53,7 @@ def get_division(date, div_number, url=None):
 	except FileNotFoundError:
 		if not url:
 			url = get_deivision_url(date,div_number)
+
 		frame = download_division_table(url)
 		frame['Party']=frame.Party.apply(parse_party)
 		frame['division_number'] = div_number

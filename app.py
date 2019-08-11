@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from commons import *
+from commons.populate_db import mps_current
 import json
 
 
@@ -14,8 +15,8 @@ def cleanup(resp_or_exc):
 
 
 @app.route('/', methods=['GET'])
-def cluster():
-    mps = Session.query(MP).all()
+def vis_data():
+    mps = Session.query(MP).filter(MP.person_id.in_(mps_current()))
     frame, _ = cluster_mps(mps,5,eu_divisions)
     frame.sort_values("party",inplace=True)
     # nodes_frame =  add_master_nodes(frame)
@@ -25,9 +26,21 @@ def cluster():
 
     divisions = Session.query(Division).filter(Division.division_number.in_(eu_divisions))
     bar_data = [div2dict(div) for div in divisions]
-
     return json.dumps([pack_data, bar_data])
+
+
+
+@app.route('/cluster', methods=['GET'])
+def cluster():
+    mps = Session.query(MP).filter(MP.person_id.in_(mps_current()))
+    frame, _ = cluster_mps(mps,5,eu_divisions)
+    frame.sort_values("party",inplace=True)
+    # nodes_frame =  add_master_nodes(frame)
+    clustered_mps =  frame.to_dict(orient='records')
+
+
+
+    return json.dumps(clustered_mps)
 #
-# test = list(cluster())
-#
-# test[55000:55070]
+# @app.route('/divisions', methods=['GET'])
+# def division()
