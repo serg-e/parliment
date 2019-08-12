@@ -4,7 +4,7 @@ from sqlalchemy.orm import scoped_session
 from commons.mapped_classes import *
 import os
 
-DB_PATH = 'commons.db'
+DB_PATH = 'commons/db/commons.db'
 
 
 
@@ -16,7 +16,7 @@ def is_db():
 		return False
 
 
-def connect_database(path='commons.db'):
+def connect_database(path=DB_PATH):
 	path = 'sqlite:///{}'.format(path)
 	engine = create_engine(path, echo=False)
 	# Base.metadata.drop_all(engine)

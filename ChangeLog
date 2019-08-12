@@ -1,0 +1,16 @@
+CHANGES
+=======
+
+* current mps fiter new routes
+* flask with bar and circle output
+* first flask setup
+* k modes consition changed to cluster moves
+* k modes: unique init fuctions, if cluster empty pick random xi as new mode
+* circle pack d3
+* bar chart added
+* d3 testing
+* download data to csv, data\_explore
+* added data\_xploration, k modes teting, needs more work see assign clusters
+* scrape divisions index table
+* bulk division db insertion, divsion titles update
+* first commit

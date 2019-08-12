@@ -3,7 +3,6 @@ from bs4 import BeautifulSoup as bs
 import bs4
 import requests
 import numpy as np
-import seaborn as sns
 from urllib.parse import urlencode, urlparse, parse_qs
 import os
 
