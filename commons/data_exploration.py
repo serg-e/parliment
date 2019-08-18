@@ -1,6 +1,6 @@
 from commons.db import Session
 from commons.mapped_classes import *
-from commons.kmodes import kmodes
+from commons.kmodes import Kmodes
 import pandas as pd
 import numpy as np
 from sqlalchemy import inspect
@@ -19,11 +19,13 @@ def make_mp_votes_array(mps, div_nums):
 
 
 
-def cluster_mps(mps,k,div_nums):
+def cluster_mps(mps,k,div_nums, n_pools=50):
     ''' list of mps , number of clusters and divsions to cluster on, returns
     dataframe and array of cluster centres'''
     mp_votes_array = make_mp_votes_array(mps, div_nums)
-    modes, cluster_map = kmodes(mp_votes_array,k)
+    kmodes = Kmodes(k,n_pools)
+    kmodes.fit(mp_votes_array)
+    modes, cluster_map = kmodes.modes , kmodes.cluster_vector
     names = [mp.name for mp in mps]
     person_ids = [mp.person_id for mp in mps]
     party = [mp.party for mp in mps]
