@@ -121,13 +121,13 @@ class Kmodes:
             self.mode_pool = []
             return None
 
-        self.mode_pool, _  = kmodes(X,self.k_clusters)
-
-        for i in range(self.n_pools-1):
-            end_modes, _  = kmodes(X,self.k_clusters)
-            self.mode_pool = np.concatenate([self.mode_pool, end_modes])
-
-        self.init_modes = np.ones_like(initlise_rand_modes(X,self.k_clusters))
+        # self.mode_pool, _  = kmodes(X,self.k_clusters)
+        #
+        # for i in range(self.n_pools-1):
+        #     end_modes, _  = kmodes(X,self.k_clusters)
+        #     self.mode_pool = np.concatenate([self.mode_pool, end_modes])
+        #
+        # self.init_modes = np.ones_like(initlise_rand_modes(X,self.k_clusters))
 
 
 
