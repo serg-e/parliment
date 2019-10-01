@@ -28,11 +28,55 @@ def distance(xi,q):
             dist+=1
     return dist
 
-def initlise_rand_modes(X,k):
+def initilise_rand_modes(X,k):
     #initialise, ineefficient !
     unique_rows = np.unique(X, axis =0)
     rand = np.random.permutation(unique_rows)
     return rand[:k]
+
+def initialise_cao(X,k):
+    # density based initilisation, Cao et al 2009
+    # http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.474.8181&rep=rep1&type=pdf
+
+
+    n, m_attr = X.shape
+
+    modes = []
+
+    dens = np.zeros(n)
+
+    # dens_a w.r.t. attribute a  = number of elements in U with matching attribute / n
+    # dens = sum over dens w.r.t. a / m_attr
+
+    for i in range(n):
+
+        dens_a =[]
+
+        for m in range(m_attr):
+            attrs, counts = np.unique(X[:,m], return_counts=True)
+            freq = {attr:count for attr, count in zip(attrs,counts)}
+            dens_a.append(freq[X[i,m]]/float(n))
+
+        dens[i] = sum(dens_a)/float(m_attr)
+
+
+    modes.append(X[np.argmax(dens)])
+
+
+
+    for i in range(1,k):
+        scores = np.empty((len(modes),n))
+        for k in range(len(modes)):
+            scores[k] = dens*np.array([distance(i, modes[k]) for i in X])
+
+
+
+
+        modes.append(X[np.argmax(np.min(scores,axis=0))])
+
+    return np.array(modes)
+
+
 
 
 def assign_mode(xi,modes):
@@ -59,25 +103,20 @@ def calc_new_modes(X,cluster_vector,modes, verbose=False):
 
         except IndexError:
             # empty
-            q = initlise_rand_modes(X,1)
+            q = initilise_rand_modes(X,1)
             new_modes.append(q)
 
     return np.array(new_modes)
 
 
 
-def kmodes(X,k, init_modes=None, verbose=True):
+def kmodes(X,k, init, verbose=False):
     ''' X data n x m_attr , k modes , output tuple of arrays
     (modes 1 x k , cluster vector 1xi)'''
     #red inti variables
     n, m_attr = X.shape
 
-    if type(init_modes) == type(None):
-        end_modes = initlise_rand_modes(X,k)
-        print('Rand init')
-    else:
-        end_modes = init_modes
-        print('Init modes provided')
+    end_modes = init(X,k)
 
     start_modes = np.ones_like(end_modes)
     #
@@ -105,39 +144,20 @@ def kmodes(X,k, init_modes=None, verbose=True):
 
 class Kmodes:
 
-    def __init__(self, k_clusters, n_pools=1, distance=distance):
+    def __init__(self, k_clusters, n_pools=1, distance=distance, init=initialise_cao):
         self.k_clusters = k_clusters
         self.distance = distance
         self.n_pools = n_pools
+        self.init = init
 
 
 
     def fit(self,X):
-        m_attr = X.shape[1]
-        self.mode_pool = np.ones((self.k_clusters, m_attr))
 
-        if self.n_pools == 1:
-            self.modes, self.cluster_vector = kmodes(X, self.k_clusters)
-            self.mode_pool = []
-            return None
-
-        # self.mode_pool, _  = kmodes(X,self.k_clusters)
-        #
-        # for i in range(self.n_pools-1):
-        #     end_modes, _  = kmodes(X,self.k_clusters)
-        #     self.mode_pool = np.concatenate([self.mode_pool, end_modes])
-        #
-        # self.init_modes = np.ones_like(initlise_rand_modes(X,self.k_clusters))
-
-
-
-        # self.modes, self.cluster_vector = kmodes(X, self.k_clusters,\
-        # self.init_modes)
-
-
+        self.modes, self.cluster_vector = kmodes(X,self.k_clusters,init)
 
 
     def predict(X):
-        pass
+        assign_modes(X,self.modes)
 
 if __name__=='__main__':pass
