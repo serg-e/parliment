@@ -1,5 +1,5 @@
 from commons.twfy import twfy
-from commons.get_divisions import get_division,download_divisions_index
+from commons.fetch_data import get_division,download_divisions_index
 from commons.db import Session
 from commons.mapped_classes import *
 from sqlalchemy.exc import IntegrityError
@@ -53,55 +53,57 @@ def add_division(div_frame, session):
 	#get person id from database by matching name
 	div_frame['person_id']=div_frame.Name.apply(lambda name : get_id_fuzz(name,session))
 
-	assert len(div_frame[div_frame.person_id.isnull()==False])!=0, \
-	"not all MPs assigned id"
+	if len(div_frame[div_frame.person_id.isnull()==True])==0:
+		print("not all MPs assigned id")
+		print('missing {}'.format(div_frame[div_frame.person_id.isnull()==True]))
 
 	select_atrr = ['person_id','vote', 'division_number']
 
 	added = 0
-	lost = []
 
-	for i, vote in div_frame.iterrows():
-		vote_data = {key:vote[key] for key in select_atrr}
+	add_div = div_frame[select_atrr].copy()
+	records = add_div[(add_div.person_id!='none')&(add_div.person_id.isnull()==False)].to_dict(orient='records')
 
-		if vote_data['person_id'] == 'none':
-			continue
-		try:
-			session.add(Vote(**vote_data))
-			session.flush()
-			added +=1
+	session.bulk_insert_mappings(Vote,records)
 
-		except IntegrityError:
-			session.rollback()
-			print('vote from division {} exists'.format(vote_data['division_number']))
+	# for i, vote in div_frame.iterrows():
+	# 	vote_data = {key:vote[key] for key in select_atrr}
+	#
+	# 	if vote_data['person_id'] == 'none':
+	# 		continue
+	# 	try:
+	# 		session.add(Vote(**vote_data))
+	# 		session.flush()
+	# 		added +=1
+	#
+	# 	except IntegrityError:
+	# 		session.rollback()
+	# 		print('vote from division {} exists'.format(vote_data['division_number']))
 	session.commit()
 	# print('Added {} votes'.format(added))
 
-'''
-person_id not found for  Barry McElduff, 60 closestJake Berry
-386 divsions added of 396, %
-person_id not found for  Heidi Alexander, 73 closestHeidi Allen
-person_id not found for  Paul Flynn, 70 closestPaul Farrelly
-person_id not found for  Barry McElduff, 60 closestJake Berry
-'''''
 
 
-
-def bulk_add_divisions(divs,session, house='commons'):
+def bulk_add_divisions(session,divs=None ,house='commons'):
+	if not divs: divs = download_divisions_index()
 	'''divs: dataframe with column for date and division number'''
 	divs = divs[divs.house==house].copy()
 	divs_in_db = [num[0] for num  in session.query(Vote.division_number).distinct()]
 	divs = divs[~divs.division_number.isin(divs_in_db)].copy()
 	div_frames = (get_division((row['date']), row['division_number']) for index, row in divs.iterrows())
-	print('All division data downloaded, adding. {} divisions'.format(len(divs)))
+	print('Adding {} divisions'.format(len(divs)))
 	added =0
 	for div in div_frames:
 		add_division(div,session)
 		added +=1
-		print('{0} divsions added of {1}'.format(added,len(divs)))
+		print('{} divsions added of {}'.format(added,len(divs)))
 	populate_dvisions(session)
 	update_div_titles(session)
 	session.commit()
+	start_date = min(divs.date)
+	end_date = max(divs.date)
+	print('All divisions from {} to {} added to database'\
+	.format(start_date,end_date))
 
 
 
@@ -128,18 +130,9 @@ def populate_dvisions(session):
 			session.rollback()
 
 if __name__ == '__main__':
-	# session = Session()
-	#
-	# # add_mps(session,date='2019-02-01')
-	# # print('mps added')
-	# # divs = download_divisions_index()
-	# # bulk_add_divisions(divs,session)
-	# # # bulk_add_divisions(divs,session)
-	# populate_dvisions(session)
-	# update_div_titles(session)
-	# Session.remove()
 
-	# print('Done')
-	mps_current()
+
+	print('Done')
+
 
 ''' check that each divsion contains all votes'''

@@ -8,7 +8,7 @@ import os
 
 
 
-def get_deivision_url(date, div_number, display='allpossible'):
+def generate_deivision_url(date, div_number, display='allpossible'):
 	'''returns the url containing division table, both the date
 		division number required. date format: YYYY-MM-DD'''
 
@@ -19,8 +19,6 @@ def get_deivision_url(date, div_number, display='allpossible'):
 
 def download_division_table(url):
 	'''requires full division url, downloads division data and returns dataframe
-
-
 	'''
 	page=requests.get(url)
 	soup = bs(page.content, 'html.parser')
@@ -31,37 +29,34 @@ def download_division_table(url):
 	        for column in line.children:
 	            data.append(column.get_text())
 	data = np.array(data)
-	lines = int(len(data)/4)
-	data=data.reshape(lines,4)
+	num_lines = int(len(data)/4)
+	data=data.reshape(num_lines,4)
 	frame =pd.DataFrame(data=data[1:,...], columns=data[0])
-
-
-
 	return frame
 
 def get_division(date, div_number, url=None):
 	''' date: YYYY-MM-DD, division number required, dowloads data and outputs data frame
 		source url: https://www.publicwhip.org.uk/division.php?
 	'''
-	path = os.path.join('data', str(div_number))
+	# path = os.path.join('data', str(div_number))
 
-	try:
-		frame = pd.read_csv(path)
-		return frame
+	# try:
+	# 	frame = pd.read_csv(path)
+	# 	return frame
+	#
+	# except FileNotFoundError:
+	if not url:
+		url = generate_deivision_url(date,div_number)
 
-	except FileNotFoundError:
-		if not url:
-			url = get_deivision_url(date,div_number)
+	frame = download_division_table(url)
+	frame['Party']=frame.Party.apply(parse_party)
+	frame['division_number'] = div_number
+	frame['date'] = pd.to_datetime(date)
+	frame['url'] = url
+	frame = frame.rename(columns={'Vote':'vote'})
 
-		frame = download_division_table(url)
-		frame['Party']=frame.Party.apply(parse_party)
-		frame['division_number'] = div_number
-		frame['date'] = pd.to_datetime(date)
-		frame['url'] = url
-		frame = frame.rename(columns={'Vote':'vote'})
-
-		frame.to_csv(path)
-		return frame
+	# frame.to_csv(path)
+	return frame
 
 
 def parse_party(string):
@@ -89,11 +84,11 @@ def download_divisions_index(url='https://www.publicwhip.org.uk/divisions.php'):
 	    except KeyError:
 	        continue
 	frame = pd.DataFrame(data)
-	frame['division_number']=frame.number.astype(int,inplace=True)
+	frame['division_number']=frame.number.astype(int)
 	frame.drop(axis=1,inplace=True, columns=['number'])
 	return frame
 
-if __name__ =='__main__':
-	divs = download_divisions_index()
-	divs.division_numner
-	divs.head()
+# if __name__ =='__main__':
+# 	divs = download_divisions_index()
+# 	divs.division_numner
+# 	divs.head()

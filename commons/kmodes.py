@@ -35,7 +35,7 @@ def initilise_rand_modes(X,k):
     return rand[:k]
 
 def initialise_cao(X,k):
-    # density based initilisation, Cao et al 2009
+    # density based initilisation from Cao et al 2009
     # http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.474.8181&rep=rep1&type=pdf
 
 
@@ -154,10 +154,10 @@ class Kmodes:
 
     def fit(self,X):
 
-        self.modes, self.cluster_vector = kmodes(X,self.k_clusters,init)
+        self.modes, self.cluster_vector = kmodes(X,self.k_clusters,self.init)
 
 
-    def predict(X):
-        assign_modes(X,self.modes)
+    def predict(self,X):
+        return assign_modes(X,self.modes)
 
 if __name__=='__main__':pass

@@ -1,17 +1,30 @@
 from commons.db import Session
 from commons.mapped_classes import *
-from commons.get_divisions import *
+from commons.fetch_data import *
 from commons.data_exploration import *
 from flask import Flask
 from flask_cors import CORS
 from commons import *
-from commons.populate_db import mps_current
+from commons.populate_db import *
 import json
 
 
 
 app = Flask(__name__)
 CORS(app)
+
+session = Session()
+add_mps(session)
+bulk_add_divisions(session)
+session.remove()
+
+# @app.before_first_request
+# def activate_job():
+#     def run_job():
+#         session = Session()
+#         add_mps(session)
+#         bulk_add_divisions(session)
+#         session.remove()
 
 @app.teardown_appcontext
 def cleanup(resp_or_exc):
@@ -21,6 +34,7 @@ def cleanup(resp_or_exc):
 @app.route('/', methods=['GET'])
 def vis_data():
     mps = Session.query(MP).filter(MP.person_id.in_(mps_current()))
+
     frame, _ = cluster_mps(mps,5,eu_divisions)
     frame.sort_values("party",inplace=True)
     # nodes_frame =  add_master_nodes(frame)

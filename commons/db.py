@@ -4,7 +4,7 @@ from sqlalchemy.orm import scoped_session
 from commons.mapped_classes import *
 import os
 
-DB_PATH = 'commons/db/commons.db'
+DB_PATH = 'commons.db'
 
 
 
@@ -23,14 +23,14 @@ def connect_database(path=DB_PATH):
 	Base.metadata.create_all(engine)
 	return engine
 
-def new_database(path='commons.db'):
+def new_database(path=DB_PATH):
 	path = 'sqlite:///{}'.format(path)
 	engine = create_engine(path, echo=False)
 	Base.metadata.drop_all(engine)
 	Base.metadata.create_all(engine)
 	return engine
 
-def start_db(path='commons.db'):
+def start_db(path=DB_PATH):
 	''''returns Session object'''
 	if is_db():
 
