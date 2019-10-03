@@ -1,9 +1,7 @@
 from commons.twfy import twfy
 from commons.fetch_data import get_division,download_divisions_index
-from commons.db import Session
 from commons.mapped_classes import *
 from sqlalchemy.exc import IntegrityError
-from fuzzywuzzy import fuzz
 
 from datetime import date
 
@@ -14,15 +12,18 @@ from datetime import date
 
 def add_mps(session,date=date.today()):
 	mps = twfy.getMPS(date=date)
+	print('new mps from twfy...')
 	select_atrr = ['member_id','person_id','name','party', 'constituency']
 	for mp in mps:
 		try:
 			mp_data = {key:mp[key] for key in select_atrr}
 			session.add(MP(**mp_data))
 			session.flush()
+			session.commit()
+			print(mp['name'], 'added')
 		except IntegrityError:
 			session.rollback()
-	session.commit()
+
 
 def mps_current(date=date.today()):
 	mps = twfy.getMPS(date=date)
@@ -31,29 +32,34 @@ def mps_current(date=date.today()):
 
 
 
-def get_id_fuzz(name,session):
+def find_id_from_name(name,session, date):
 	matchs =[]
-	for mp_name, person_id, in session.query(MP.name, MP.person_id).all():
-		if fuzz.partial_token_sort_ratio(name,mp_name) ==100:
-			return person_id
-		else:
-			matchs.append(fuzz.partial_token_sort_ratio(name,mp_name))
-	closest = max(matchs)
-	closestd_id = matchs.index(max(matchs))
-	cname = [mp.name for mp in  session.query(MP).all()][closestd_id]
-	print('person_id not found for {0}, {1} closest{2}'.format(name,closest,cname))
-	return None
+	name = str(name).strip()
 
-'''lazy needs work, fuzzy compare input name with list of MP names in DB
-	returns person_id'''
+	try:
+		person_id = session.query(MP.person_id).filter(MP.name==name)[0][0]
+		# print('person id found {}'.format(person_id))
+		return person_id
+
+	except IndexError:
+		print('Missing MP:{}...loading mps as on {}'.format(name, date))
+		add_mps(session, date=date)
+		session.commit()
+		person_id = session.query(MP.person_id).filter(MP.name==name)[0][0]
+		print('person id found {}'.format(person_id))
+		return person_id
+
+
+
 
 
 def add_division(div_frame, session):
 
 	#get person id from database by matching name
-	div_frame['person_id']=div_frame.Name.apply(lambda name : get_id_fuzz(name,session))
+	date = div_frame['date'].iloc[0]
+	div_frame['person_id']=div_frame.Name.apply(lambda name : find_id_from_name(name,session,date))
 
-	if len(div_frame[div_frame.person_id.isnull()==True])==0:
+	if len(div_frame[div_frame.person_id.isnull()==True])!=0:
 		print("not all MPs assigned id")
 		print('missing {}'.format(div_frame[div_frame.person_id.isnull()==True]))
 
@@ -65,22 +71,8 @@ def add_division(div_frame, session):
 	records = add_div[(add_div.person_id!='none')&(add_div.person_id.isnull()==False)].to_dict(orient='records')
 
 	session.bulk_insert_mappings(Vote,records)
-
-	# for i, vote in div_frame.iterrows():
-	# 	vote_data = {key:vote[key] for key in select_atrr}
-	#
-	# 	if vote_data['person_id'] == 'none':
-	# 		continue
-	# 	try:
-	# 		session.add(Vote(**vote_data))
-	# 		session.flush()
-	# 		added +=1
-	#
-	# 	except IntegrityError:
-	# 		session.rollback()
-	# 		print('vote from division {} exists'.format(vote_data['division_number']))
 	session.commit()
-	# print('Added {} votes'.format(added))
+
 
 
 
@@ -88,15 +80,22 @@ def bulk_add_divisions(session,divs=None ,house='commons'):
 	if not divs: divs = download_divisions_index()
 	'''divs: dataframe with column for date and division number'''
 	divs = divs[divs.house==house].copy()
+
 	divs_in_db = [num[0] for num  in session.query(Vote.division_number).distinct()]
 	divs = divs[~divs.division_number.isin(divs_in_db)].copy()
+
+	if len(divs)==0:
+		print('No divisions to add')
+		return None
+
 	div_frames = (get_division((row['date']), row['division_number']) for index, row in divs.iterrows())
 	print('Adding {} divisions'.format(len(divs)))
 	added =0
 	for div in div_frames:
 		add_division(div,session)
 		added +=1
-		print('{} divsions added of {}'.format(added,len(divs)))
+		print('{} divsions added of {}'.format(added,len(divs)), end='\r')
+
 	populate_dvisions(session)
 	update_div_titles(session)
 	session.commit()

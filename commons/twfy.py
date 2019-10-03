@@ -44,6 +44,13 @@ class TWFY:
 		response = requests.get(self.url + 'getMPS', params=params)
 		return json.loads(response.text)
 
+	def getMP(self, mp_name):
+		params = self.params
+		params['extra'] = mp_name
+		response = requests.get(self.url + 'getMP', params=params)
+		return json.loads(response.text)
+
+
 
 twfy=TWFY(API_KEY)
 

@@ -13,18 +13,7 @@ import json
 app = Flask(__name__)
 CORS(app)
 
-session = Session()
-add_mps(session)
-bulk_add_divisions(session)
-session.remove()
 
-# @app.before_first_request
-# def activate_job():
-#     def run_job():
-#         session = Session()
-#         add_mps(session)
-#         bulk_add_divisions(session)
-#         session.remove()
 
 @app.teardown_appcontext
 def cleanup(resp_or_exc):
