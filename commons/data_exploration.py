@@ -40,10 +40,9 @@ def cluster_mps(mps,k,div_nums, n_pools=50):
     ''' list of mps , number of clusters and divsions to cluster on, returns
     dataframe and array of cluster centres'''
     mp_votes_array = make_mp_votes_frame(mps, div_nums)
-    print(mp_votes_array.shape)
     kmodes = Kmodes(k,n_pools)
     kmodes.fit(mp_votes_array)
-    modes, cluster_map = kmodes.modes , kmodes.cluster_vector
+    modes, cluster_map = kmodes.centroids , kmodes.cluster_vector
     names = [mp.name for mp in mps]
     person_ids = [mp.person_id for mp in mps]
     party = [mp.party for mp in mps]

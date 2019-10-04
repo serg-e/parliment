@@ -7,8 +7,6 @@ from flask_cors import CORS
 from commons import *
 from commons.populate_db import *
 import json
-# import dash
-# import dash_html_components as html
 
 
 
@@ -50,16 +48,50 @@ def cluster():
 
 @app.route('/plotly_dashboard')
 def render_dashboard():
-    return flask.redirect('/dash/')
+    return redirect('/dash/')
 
 
-    return json.dumps(clustered_mps)
+''' Dash App '''
 
-#
-# app_dash = dash.Dash(
-#     __name__,
-#     server=app,
-#     routes_pathname_prefix='/dash/'
-# )
-#
-# app_dash.layout = html.Div("My Dash app")
+import dash
+import dash_html_components as html
+import dash_core_components as dcc
+from dash.dependencies import Input, Output
+import plotly.graph_objs as go
+
+
+
+app_dash = dash.Dash(
+    __name__,
+    server=app,
+    routes_pathname_prefix='/dash/'
+)
+
+app_dash.layout = html.Div(children=[
+                dcc.Input(id='input', value='', type='text'),
+                html.Div(id='bar_chart_div')
+                ])
+
+@app_dash.callback(
+Output(component_id='bar_chart_div', component_property='children'),
+[Input(component_id='input', component_property='value')]
+)
+def draw_bar_chart(div_num):
+
+    div_num = int(div_num)
+    div = Session.query(Division)\
+                  .filter(Division.division_number==div_num).one()
+    division = div2dict(div)
+
+    X = ['ayes', 'noes', 'abstentions']
+    Y = [division[x] for x in X]
+
+    bar = go.Bar(x=X,y=Y)
+
+    return dcc.Graph(
+        id='bar_chart',
+        figure={
+            'data': [bar],
+            'layout':{'title':division['title']}
+        }
+    )
