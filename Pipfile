@@ -18,6 +18,8 @@ fuzzywuzzy = "*"
 flask-cors = "*"
 uwsgi = "*"
 python-levenshtein = "*"
+dash = "*"
+sklearn = "*"
 
 [requires]
 python_version = "3.7"

@@ -1,5 +1,6 @@
 import numpy as np
 from scipy import stats
+from sklearn.preprocessing import LabelEncoder
 
 '''
 K modes
@@ -114,6 +115,9 @@ def kmodes(X,k, init, verbose=False):
     ''' X data n x m_attr , k modes , output tuple of arrays
     (modes 1 x k , cluster vector 1xi)'''
     #red inti variables
+
+
+
     n, m_attr = X.shape
 
     end_modes = init(X,k)
@@ -154,10 +158,13 @@ class Kmodes:
 
     def fit(self,X):
 
-        self.modes, self.cluster_vector = kmodes(X,self.k_clusters,self.init)
+        le = LabelEncoder()
+        X = X.apply(lambda col : le.fit_transform(col))
+        X = X.values
+
+        self.modes_, self.cluster_vector = kmodes(X,self.k_clusters,self.init)
+        self.centroids = np.array([le.inverse_transform(mode) for mode in self.modes_])
 
 
     def predict(self,X):
-        return assign_modes(X,self.modes)
-
-if __name__=='__main__':pass
+        return assign_modes(X,self.modes_)

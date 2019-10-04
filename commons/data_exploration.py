@@ -6,15 +6,32 @@ import numpy as np
 from sqlalchemy import inspect
 import os
 
-eu_divisions = [357, 358, 359,360,361,362,373,374,375,377,378,394, 395, 404, 405,406,407,408,409,413,356,354,293,293,292,291,274]
+eu_divisions = [357, 358, 359,360,361,362,373,374,375,377,378,394, 395, 404, \
+                405,406,407,408,409,413,356,354,293,293,292,291,274]
 
-def make_mp_votes_array(mps, div_nums):
+def make_mp_votes_frame(mps, div_nums):
     ''' array : len(mps) x len(div_nums) sequence of votes fo reach mp (row)
     input array for kmodes
     '''
-    votes = [mp.votes for mp in mps]
-    filtered_votes = [[vote.vote for vote in filter(lambda vote : vote.division_number in div_nums, mp)] for mp in votes]
-    return np.array(filtered_votes)
+    # votes = np.empty((m, n), dtype=np.string_ )
+    # inneficient! vectorise the loops and reduce copying
+
+    votes = {mp.name: {} for mp in mps}
+
+    for mp in mps:
+        for div in div_nums:
+
+            try:
+                votes[mp.name][div] = list(filter(lambda vote: vote.division_number == div, mp.votes))[0].vote
+
+            except IndexError:
+                votes[mp.name][div] = 'absent'
+
+
+    votes = pd.DataFrame(data=votes).transpose()
+
+    return votes
+
 
 
 
@@ -22,7 +39,8 @@ def make_mp_votes_array(mps, div_nums):
 def cluster_mps(mps,k,div_nums, n_pools=50):
     ''' list of mps , number of clusters and divsions to cluster on, returns
     dataframe and array of cluster centres'''
-    mp_votes_array = make_mp_votes_array(mps, div_nums)
+    mp_votes_array = make_mp_votes_frame(mps, div_nums)
+    print(mp_votes_array.shape)
     kmodes = Kmodes(k,n_pools)
     kmodes.fit(mp_votes_array)
     modes, cluster_map = kmodes.modes , kmodes.cluster_vector
