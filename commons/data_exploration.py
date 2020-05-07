@@ -50,7 +50,7 @@ def cluster_mps(mps,k,div_nums, n_pools=50):
     results = pd.DataFrame(data, columns=['name', 'person_id', 'party', 'cluster'])
     results['cluster'] = results.cluster.astype(int)
     results['person_id'] = results.person_id.astype(int)
-
+    results.sort_values("party",inplace=True)
     return results, modes
 
 
@@ -73,6 +73,10 @@ def div2dict(div):
     div_dict = {'title': div.title , 'division_number':div.division_number,\
      'ayes':len(div.ayes), 'noes':len(div.noes), 'abstentions':len(div.abstentions)}
     return div_dict
+
+def query2df(query):
+    return pd.read_sql(query.statement, query.session.bind)
+
 
 
 

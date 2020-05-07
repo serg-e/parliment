@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "commons_service"
+version = "0.1.0"
+description = ""
+authors = ["serge <smosesov@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+beautifulsoup4 = "=4.8.0"
+bs4 = "=0.0.1"
+certifi = "=2019.6.16"
+chardet = "=3.0.4"
+Click = "=7.0"
+Flask = "=1.1.1"
+Flask-Cors = "=3.0.8"
+fuzzywuzzy = "=0.17.0"
+idna = "=2.8"
+itsdangerous = "=1.1.0"
+Jinja2 = "=2.10.1"
+MarkupSafe = "=1.1.1"
+numpy = "=1.17.0"
+pandas = "=0.25.0"
+python-dateutil = "=2.8.0"
+pytz = "=2019.2"
+requests = "=2.22.0"
+scipy = "=1.3.1"
+six = "=1.12.0"
+soupsieve = "=1.9.2"
+SQLAlchemy = "=1.3.6"
+urllib3 = "=1.25.3"
+uWSGI = "=2.0.18"
+Werkzeug = "=0.15.5"
+sklearn = "^0.0.0"
+
+[tool.poetry.dev-dependencies]
+autopep8 = "^1.4"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

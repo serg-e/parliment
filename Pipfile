@@ -20,6 +20,8 @@ uwsgi = "*"
 python-levenshtein = "*"
 dash = "*"
 sklearn = "*"
+dash-table = "*"
+streamlit = "*"
 
 [requires]
 python_version = "3.7"

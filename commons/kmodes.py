@@ -158,6 +158,8 @@ class Kmodes:
 
     def fit(self,X):
 
+        assert isinstance(X, pd.Dataframe)
+
         le = LabelEncoder()
         X = X.apply(lambda col : le.fit_transform(col))
         X = X.values
