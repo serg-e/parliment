@@ -1,6 +1,6 @@
 # Parliment
 
-Analysing the votes in the House of Commons using the kmodes algorithm.
+Analysing the votes in the House of Commons using the kmodes algorithm to identify voting blocks amongs Members of Parliment.
 
 This repository contains:
 
